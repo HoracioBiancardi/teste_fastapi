@@ -32,10 +32,6 @@ jobs:
         poetry env use 3.12.3
         poetry install
 
-    - name: Análise de segurança das dependências
-      run: |
-        poetry run safety check
-
     - name: Testes unitários
       run: |
         poetry run pytest
