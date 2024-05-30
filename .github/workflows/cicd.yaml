@@ -22,8 +22,14 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install git python3-pip curl
-        python3 -m pip install --upgrade pip
-        python3 -m pip install poetry
+        curl -sSL https://install.python-poetry.org | python3 -  # Instalação do Poetry
+        curl https://pyenv.run | bash  # Instalação do Pyenv
+        export PATH="$HOME/.pyenv/bin:$PATH"
+        eval "$(pyenv init --path)"
+        eval "$(pyenv virtualenv-init -)"
+        pyenv install 3.12.3  # Instala o Python 3.12.3
+        pyenv global 3.12.3  # Define o Python 3.12.3 como global
+        poetry env use 3.12.3
         poetry install
 
     - name: Verificação de formatação de código
