@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # ajuste para o nome da sua branch principal
+      - main
 
 jobs:
   build:
@@ -13,22 +13,48 @@ jobs:
     - name: Checkout do código
       uses: actions/checkout@v2
 
+    - name: Verificação do ambiente Python
+      run: |
+        python3 --version
+        python3 -m pip --version
+
     - name: Configuração do ambiente
       run: |
         sudo apt-get update
         sudo apt-get install git python3-pip curl
-        curl -sSL https://install.python-poetry.org | python3 -  # Instalação do Poetry
-        curl https://pyenv.run | bash  # Instalação do Pyenv
-        export PATH="$HOME/.pyenv/bin:$PATH"
-        eval "$(pyenv init --path)"
-        eval "$(pyenv virtualenv-init -)"
-        pyenv install 3.12.3  # Instala o Python 3.12.3
-        pyenv global 3.12.3  # Define o Python 3.12.3 como global
-        poetry env use 3.12.3
-        poetry install  # Instala as dependências usando o Poetry
+        python3 -m pip install --upgrade pip
+        python3 -m pip install poetry
+        poetry install
 
-    - name: Testes
+    - name: Verificação de formatação de código
+      run: |
+        poetry run black --check .
+        poetry run flake8 .
+
+    - name: Análise de segurança das dependências
+      run: |
+        poetry run safety check
+
+    - name: Testes unitários
       run: |
         poetry run pytest
 
-    # Se desejar implantar em algum ambiente, adicione etapas de implantação aqui
+    - name: Implantação em ambiente de teste
+      run: |
+        # Comandos para implantar em um ambiente de teste
+        # Exemplo: enviar código para um servidor de teste ou atualizar uma instância de teste na nuvem
+
+    - name: Testes de integração no ambiente de teste
+      run: |
+        # Comandos para executar testes de integração específicos para o ambiente de teste
+        # Isso pode incluir testes que interagem com serviços de terceiros ou bancos de dados de teste
+
+    - name: Notificação de status
+      run: |
+        # Comandos para enviar notificações de status sobre a implantação no ambiente de teste
+
+    - name: Limpeza de recursos
+      run: |
+        # Comandos para limpar recursos temporários ou não utilizados no ambiente de teste
+
+    # Se desejar implantar em algum ambiente de produção, adicione etapas de implantação aqui
