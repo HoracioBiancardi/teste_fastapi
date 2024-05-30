@@ -1,0 +1,33 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # ajuste para o nome da sua branch principal
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout do código
+      uses: actions/checkout@v2
+
+    - name: Configuração do ambiente
+      run: |
+        sudo apt-get update
+        sudo apt-get install git python3-pip curl
+        curl -sSL https://install.python-poetry.org | python3 -  # Instalação do Poetry
+        curl https://pyenv.run | bash  # Instalação do Pyenv
+        export PATH="$HOME/.pyenv/bin:$PATH"
+        eval "$(pyenv init --path)"
+        eval "$(pyenv virtualenv-init -)"
+        pyenv install 3.12.3  # Instala o Python 3.12.3
+        pyenv global 3.12.3  # Define o Python 3.12.3 como global
+        poetry install  # Instala as dependências usando o Poetry
+
+    - name: Testes
+      run: |
+        poetry run pytest
+
+    # Se desejar implantar em algum ambiente, adicione etapas de implantação aqui
