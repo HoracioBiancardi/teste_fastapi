@@ -24,6 +24,7 @@ jobs:
         eval "$(pyenv virtualenv-init -)"
         pyenv install 3.12.3  # Instala o Python 3.12.3
         pyenv global 3.12.3  # Define o Python 3.12.3 como global
+        poetry env use 3.12.3
         poetry install  # Instala as dependências usando o Poetry
 
     - name: Testes
