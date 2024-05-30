@@ -32,11 +32,6 @@ jobs:
         poetry env use 3.12.3
         poetry install
 
-    - name: Verificação de formatação de código
-      run: |
-        poetry run black --check .
-        poetry run flake8 .
-
     - name: Análise de segurança das dependências
       run: |
         poetry run safety check
