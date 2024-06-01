@@ -1,7 +1,7 @@
 name: CI/CD Pipeline
 
 on:
-  push:
+  pull_request:
     branches:
       - 'release/**'
 
@@ -19,9 +19,7 @@ jobs:
           python-version: '3.9'  # ou a versão do Python que você está usando
 
       - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "::add-path::$(python3 -m site --user-base)/bin"
+        run: pip install poetry
 
       - name: Install dependencies
         run: poetry install
@@ -33,7 +31,7 @@ jobs:
       - name: Verify coverage
         id: verify-coverage
         run: |
-          coverage report --fail-under=80 || echo "coverage_failed=true" >> $GITHUB_ENV
+          poetry run coverage report --fail-under=80 || echo "coverage_failed=true" >> $GITHUB_ENV
 
       - name: Upload coverage report
         if: failure()
