@@ -72,7 +72,7 @@ jobs:
 
       - name: Wait for approval
         if: env.coverage_failed != 'true'
-        uses: pull-request-merge@v2
+        uses: ./.github/actions/pull-request-merge  # Especifique o caminho correto para a ação no seu repositório
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
