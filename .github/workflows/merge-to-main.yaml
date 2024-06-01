@@ -1,0 +1,45 @@
+
+# .github/workflows/merge-to-main.yml
+name: Merge to Main
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types:
+      - completed
+
+jobs:
+  merge:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v2
+        with:
+          ref: main
+
+      - name: Checkout release branch
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Merge release branch into main
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git checkout main
+          git merge ${{ github.event.workflow_run.head_branch }} --no-ff
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Adicionando aprovação manual antes da mesclagem
+      - name: Request review
+        if: always()
+        uses: octokit/request-action@v2.x
+        with:
+          route: POST /repos/:owner/:repo/pulls/:pull_number/requested_reviewers
+          pull_number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          reviewers: HoracioBiancardi  # Substitua pelos usuários que devem aprovar a revisão
+          token: ${{ secrets.GITHUB_TOKEN }}
