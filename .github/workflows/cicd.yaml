@@ -22,7 +22,7 @@ jobs:
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           echo "::add-path::$(python3 -m site --user-base)/bin"
-          
+
       - name: Install dependencies
         run: poetry install
 
@@ -31,9 +31,9 @@ jobs:
           poetry run pytest --cov=./ --cov-report=xml
 
       - name: Verify coverage
+        id: verify-coverage
         run: |
-          poetry run coverage report --fail-under=80
-        continue-on-error: true
+          coverage report --fail-under=80 || echo "coverage_failed=true" >> $GITHUB_ENV
 
       - name: Upload coverage report
         if: failure()
@@ -42,13 +42,35 @@ jobs:
           name: coverage-report
           path: coverage.xml
 
+      - name: Save coverage check result
+        run: |
+          echo "coverage_failed=${{ env.coverage_failed }}" > coverage_check.txt
+        if: always()
+
+      - name: Upload coverage check result
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-check
+          path: coverage_check.txt
+
   require-approval:
     runs-on: ubuntu-latest
     needs: build
-    if: success() && steps.verify-coverage.outcome == 'success'
 
     steps:
+      - name: Download coverage check result
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage-check
+
+      - name: Read coverage check result
+        id: read-coverage-check
+        run: |
+          coverage_failed=$(cat coverage_check.txt)
+          echo "coverage_failed=$coverage_failed" >> $GITHUB_ENV
+
       - name: Await approval
+        if: env.coverage_failed != 'true'
         uses: benc-uk/workflow-wait-for-approval@v2.2
         with:
           tag: "awaiting-approval"
@@ -58,7 +80,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge pull request into main
-        if: success()
+        if: env.coverage_failed != 'true'
         uses: actions/github-script@v5
         with:
           script: |
@@ -74,13 +96,21 @@ jobs:
   merge-release-to-main:
     runs-on: ubuntu-latest
     needs: require-approval
-    if: success()
-    
+
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
+      - name: Download coverage check result
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage-check
+
+      - name: Read coverage check result
+        id: read-coverage-check
+        run: |
+          coverage_failed=$(cat coverage_check.txt)
+          echo "coverage_failed=$coverage_failed" >> $GITHUB_ENV
 
       - name: Merge release into main
+        if: env.coverage_failed != 'true'
         run: |
           git fetch origin
           git checkout main
@@ -89,6 +119,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push changes to main
+        if: env.coverage_failed != 'true'
         run: |
           git push origin main
         env:
