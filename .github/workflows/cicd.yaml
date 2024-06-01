@@ -72,7 +72,7 @@ jobs:
 
       - name: Wait for approval
         if: env.coverage_failed != 'true'
-        uses: pull-request-merge@v3
+        uses: pull-request-merge@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -121,4 +121,3 @@ jobs:
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
