@@ -1,57 +1,56 @@
+# .github/workflows/ci-cd.yml
 name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main
+      - '**'  # Executa para qualquer branch
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout do código
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Verificação do ambiente Python
-      run: |
-        python3 --version
-        python3 -m pip --version
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12.3'
 
-    - name: Configuração do ambiente
-      run: |
-        sudo apt-get update
-        sudo apt-get install git python3-pip curl
-        curl -sSL https://install.python-poetry.org | python3 -  # Instalação do Poetry
-        curl https://pyenv.run | bash  # Instalação do Pyenv
-        export PATH="$HOME/.pyenv/bin:$PATH"
-        eval "$(pyenv init --path)"
-        eval "$(pyenv virtualenv-init -)"
-        pyenv install 3.12.3  # Instala o Python 3.12.3
-        pyenv global 3.12.3  # Define o Python 3.12.3 como global
-        poetry env use 3.12.3
-        poetry install
+      - name: Setup Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git python3-pip
+          python3 -m pip install --upgrade pip
+          python3 -m pip install poetry
 
-    - name: Testes unitários
-      run: |
-        poetry run pytest
+      - name: Install dependencies
+        run: |
+          poetry install
 
-    - name: Implantação em ambiente de teste
-      run: |
-        # Comandos para implantar em um ambiente de teste
-        # Exemplo: enviar código para um servidor de teste ou atualizar uma instância de teste na nuvem
+      - name: Run tests
+        run: |
+          pytest
 
-    - name: Testes de integração no ambiente de teste
-      run: |
-        # Comandos para executar testes de integração específicos para o ambiente de teste
-        # Isso pode incluir testes que interagem com serviços de terceiros ou bancos de dados de teste
+      - name: Install coverage
+        run: |
+          python3 -m pip install coverage
 
-    - name: Notificação de status
-      run: |
-        # Comandos para enviar notificações de status sobre a implantação no ambiente de teste
+      - name: Code coverage
+        run: |
+          coverage run -m pytest
+          coverage report -m
 
-    - name: Limpeza de recursos
-      run: |
-        # Comandos para limpar recursos temporários ou não utilizados no ambiente de teste
+      - name: Notify success
+        if: success()
+        run: |
+          echo "Tests passed for ${{ github.ref }}"
+          echo "::set-output name=status::success"
 
-    # Se desejar implantar em algum ambiente de produção, adicione etapas de implantação aqui
+      - name: Notify failure
+        if: failure()
+        run: |
+          echo "Tests failed for ${{ github.ref }}"
+          echo "::set-output name=status::failure"
