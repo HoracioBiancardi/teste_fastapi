@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'  # Especifique a versão do Python aqui ou use um valor dinâmico se necessário
+          python-version: '3.12.3'  # Especifique a versão do Python aqui ou use um valor dinâmico se necessário
 
       - name: Install Poetry
         run: pip install poetry
