@@ -16,13 +16,16 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.12.3'  # ou a versão do Python que você está usando
+          python-version: '3.9'  # Especifique a versão do Python aqui ou use um valor dinâmico se necessário
 
       - name: Install Poetry
         run: pip install poetry
 
       - name: Install dependencies
         run: poetry install
+
+      - name: Install pytest-cov
+        run: poetry add --dev pytest-cov
 
       - name: Run tests with coverage
         run: |
@@ -67,15 +70,11 @@ jobs:
           coverage_failed=$(cat coverage_check.txt)
           echo "coverage_failed=$coverage_failed" >> $GITHUB_ENV
 
-      - name: Await approval
+      - name: Wait for approval
         if: env.coverage_failed != 'true'
-        uses: benc-uk/workflow-wait-for-approval@v2.2
+        uses: pull-request-merge@v3
         with:
-          tag: "awaiting-approval"
-          requires: "approver"  # nome do grupo ou usuário que precisa aprovar
-          timeout_minutes: 60
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge pull request into main
         if: env.coverage_failed != 'true'
