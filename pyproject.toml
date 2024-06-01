@@ -6,7 +6,7 @@ authors = ["Horacio Biancardi  <50308943+HoracioBiancardi@users.noreply.github.c
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "3.12.3"
 fastapi = "^0.111.0"
 
 
