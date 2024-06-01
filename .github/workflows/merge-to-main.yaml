@@ -39,7 +39,6 @@ jobs:
         if: always()
         uses: octokit/request-action@v2.x
         with:
-          route: POST /repos/:owner/:repo/pulls/:pull_number/requested_reviewers
-          pull_number: ${{ github.event.workflow_run.pull_requests[0].number }}
-          reviewers: HoracioBiancardi  # Substitua pelos usuários que devem aprovar a revisão
+          route: POST /repos/${{ github.repository }}/pulls/${{ github.event.workflow_run.head_branch }}/requested_reviewers
+          mediaType: '{"required_pull_request_review_enforcement_level": "required"}'
           token: ${{ secrets.GITHUB_TOKEN }}
