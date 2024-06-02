@@ -30,35 +30,17 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          poetry run pytest --cov=./ --cov-report=xml
+          poetry run pytest --cov=.
 
       - name: Verify coverage
         id: verify-coverage
         run: |
-          poetry run coverage report --fail-under=80 || echo "coverage_failed=true" >> $GITHUB_ENV
-
-      - name: Upload coverage report
-        if: failure()
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-report
-          path: coverage.xml
-
-      - name: Save coverage check result
-        run: |
-          echo "coverage_failed=${{ env.coverage_failed }}" > coverage_check.txt
-        if: always()
-
-      - name: Upload coverage check result
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-check
-          path: coverage_check.txt
+          poetry run coverage report --fail-under=80 
 
   code_review:
     needs: build
     runs-on: ubuntu-latest
-    if: success()
+    if: success() 
 
     steps:
       - name: Checkout code
