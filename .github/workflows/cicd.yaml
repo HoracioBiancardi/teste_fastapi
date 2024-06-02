@@ -83,29 +83,12 @@ jobs:
     needs: require-approval
 
     steps:
-      - name: Download coverage check result
-        uses: actions/download-artifact@v2
+      - uses: actions/checkout@master
+
+      - name: Merge release -> main
+        uses: devmasx/merge-branch@master
         with:
-          name: coverage-check
-
-      - name: Read coverage check result
-        id: read-coverage-check
-        run: |
-          coverage_failed=$(cat coverage_check.txt)
-          echo "coverage_failed=$coverage_failed" >> $GITHUB_ENV
-
-      - name: Merge release into main
-        if: env.coverage_failed != 'true'
-        run: |
-          git fetch origin
-          git checkout main
-          git merge --no-ff ${{ github.head_ref }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push changes to main
-        if: env.coverage_failed != 'true'
-        run: |
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          type: now
+          target_branch: main
+          message: Merge release into main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
