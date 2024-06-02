@@ -76,7 +76,7 @@ jobs:
 
       - name: Wait for approval
         if: env.coverage_failed != 'true'
-        uses: .teste_fastapi/.github/actions/pull-request-merge  # Certifique-se de que o caminho está correto
+        uses: ./teste_fastapi/.github/actions/pull-request-merge  # Certifique-se de que o caminho está correto
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
