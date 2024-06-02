@@ -55,45 +55,20 @@ jobs:
           name: coverage-check
           path: coverage_check.txt
 
-  manual-trigger_pull_main:
-    runs-on: ubuntu-latest
+  code_review:
     needs: build
-    outputs:
-        CONTINUE_JOBS: ${{ steps.manual-trigger.outputs.CONTINUE_JOBS }}
-    steps:
-      - name: manual-trigger
-        id: manual-trigger
-        uses: benhamiltonpro/manual-trigger@v1
-        with:
-          RUN_NAME: "require-approval"
-
-
-  require-approval:
     runs-on: ubuntu-latest
-    needs: manual-trigger_pull_main
+    if: success()
+
     steps:
-      - name: Download coverage check result
-        uses: actions/download-artifact@v2
+      - name: Create a pull request to main
+        uses: peter-evans/create-pull-request@v4
         with:
-          name: coverage-check
-
-      - name: Read coverage check result
-        id: read-coverage-check
-        run: |
-          coverage_failed=$(cat coverage_check.txt)
-          echo "coverage_failed=$coverage_failed" >> $GITHUB_ENV
-
-      - name: Wait_for_approval Action
-        uses: arun291091/wait_for_approval_gha@v1
-        with:
-          base_repository_branch: main
-          github_org: HoracioBiancardi
-          repository_name: teste_fastapi
-          pr_reviewer: HoracioBiancardi
-          time_limit: 180
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-
+          commit-message: Merge release branch into main
+          branch: main
+          title: 'Merge release branch into main'
+          body: 'This PR merges the release branch into main after passing all checks.'
+          delete-branch: true
 
 #  require-approval:
 #    runs-on: ubuntu-latest
