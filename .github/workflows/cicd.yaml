@@ -69,6 +69,7 @@ jobs:
           title: 'Merge release branch into main'
           body: 'This PR merges the release branch into main after passing all checks.'
           delete-branch: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
 #  require-approval:
 #    runs-on: ubuntu-latest
