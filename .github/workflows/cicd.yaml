@@ -51,7 +51,7 @@ jobs:
             const { data: pullRequests } = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              head: 'release',
+              head: 'release', // Modifique o nome do ramo aqui, se necessário
               state: 'open'
             });
             if (pullRequests.length === 0) {
@@ -60,17 +60,12 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: 'Merge release branch into main',
-                head: 'release',
+                head: 'release', // Modifique o nome do ramo aqui, se necessário
                 base: 'main'
               });
             } else {
               console.log('Pull request already exists for the release branch.');
             }
-
-
-
-
-
 
 
 
