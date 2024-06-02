@@ -48,7 +48,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { data: pullRequests } = await github.pulls.list({
+            const { data: pullRequests } = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
               head: 'release',
@@ -56,7 +56,7 @@ jobs:
             });
             if (pullRequests.length === 0) {
               console.log('Creating pull request for the release branch...');
-              await github.pulls.create({
+              await github.rest.pulls.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: 'Merge release branch into main',
@@ -66,6 +66,16 @@ jobs:
             } else {
               console.log('Pull request already exists for the release branch.');
             }
+
+
+
+
+
+
+
+
+
+
 
 #  require-approval:
 #    runs-on: ubuntu-latest
