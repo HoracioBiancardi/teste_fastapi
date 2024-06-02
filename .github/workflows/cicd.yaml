@@ -67,5 +67,5 @@ jobs:
               pull_number: context.payload.pull_request.number,
               merge_method: 'merge'
             })
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
