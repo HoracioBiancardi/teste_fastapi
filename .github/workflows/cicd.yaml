@@ -43,29 +43,15 @@ jobs:
     if: success()
 
     steps:
-      - name: Request approval for release
-        uses: actions/github-script@v5
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { data: pullRequests } = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head: 'release', // Modifique o nome do ramo aqui, se necessário
-              state: 'open'
-            });
-            if (pullRequests.length === 0) {
-              console.log('Creating pull request for the release branch...');
-              await github.rest.pulls.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: 'Merge release branch into main',
-                head: 'release', // Modifique o nome do ramo aqui, se necessário
-                base: 'main'
-              });
-            } else {
-              console.log('Pull request already exists for the release branch.');
-            }
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+          base: main
+          title: 'Merge release branch into main'
+          body: 'This PR merges the release branch into main after passing all checks.'
+          delete-branch: false
 
 
 
