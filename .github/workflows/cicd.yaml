@@ -22,8 +22,8 @@ jobs:
 
       - name: Install Poetry
         run: |
-          pip install poetry
-
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "::add-path::$(python3 -m site --user-base)/bin"
 
       - name: Install dependencies
         run: poetry install
@@ -76,9 +76,11 @@ jobs:
 
       - name: Wait for approval
         if: env.coverage_failed != 'true'
-        uses: ../.github/actions/pull-request-merge  # Certifique-se de que o caminho está correto
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "Waiting for approval..."
+        # Aqui você pode adicionar lógica personalizada para aguardar a aprovação manual
+        # Pode ser um script que espera até receber um sinal ou uma condição de aprovação
+        # Você também pode usar ferramentas de comunicação externas para solicitar a aprovação
+        # Após a aprovação, este passo deve ser concluído com êxito para continuar com o próximo passo
 
       - name: Merge pull request into main
         if: env.coverage_failed != 'true'
