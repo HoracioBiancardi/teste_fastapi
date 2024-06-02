@@ -1,13 +1,13 @@
 name: CI/CD Pipeline
 
 on:
-  push:
-    branches:
-      - 'release/**'
+  pull_request_review:
+    types: [submitted]
 
 jobs:
-  build:
+  require-approval:
     runs-on: ubuntu-latest
+    needs: build
 
     steps:
       - name: Check out repository code
@@ -16,10 +16,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'  # Especifique a versão do Python aqui ou use um valor dinâmico se necessário
+          python-version: '3.12.3'
 
       - name: Install Poetry
-        run: pip install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "::add-path::$(python3 -m site --user-base)/bin"
 
       - name: Install dependencies
         run: poetry install
@@ -54,27 +56,21 @@ jobs:
           name: coverage-check
           path: coverage_check.txt
 
-  require-approval:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Download coverage check result
-        uses: actions/download-artifact@v2
-        with:
-          name: coverage-check
-
-      - name: Read coverage check result
-        id: read-coverage-check
-        run: |
-          coverage_failed=$(cat coverage_check.txt)
-          echo "coverage_failed=$coverage_failed" >> $GITHUB_ENV
-
       - name: Wait for approval
         if: env.coverage_failed != 'true'
-        uses: pull-request-merge@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Comment on the PR requesting manual approval
+          pull_request_url=$(jq -r .pull_request.url $GITHUB_EVENT_PATH)
+          comments_url="$pull_request_url/comments"
+          body="Please approve this pull request manually."
+          curl -X POST -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -d "{\"body\": \"$body\"}" "$comments_url"
+
+          # Check for approval
+          approval_status=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "$pull_request_url/reviews" | jq '.[] | select(.state == "approved")')
+          if [ -z "$approval_status" ]; then
+            echo "Approval not received. Exiting workflow."
+            exit 1
+          fi
 
       - name: Merge pull request into main
         if: env.coverage_failed != 'true'
@@ -121,3 +117,4 @@ jobs:
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
