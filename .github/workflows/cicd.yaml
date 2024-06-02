@@ -25,8 +25,11 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
+      - name: Install pytest
+        run: poetry add pytest -G dev 
+
       - name: Install pytest-cov
-        run: poetry add pytest-cov -G --dev 
+        run: poetry add pytest-cov -G dev 
 
       - name: Run tests with coverage
         run: |
