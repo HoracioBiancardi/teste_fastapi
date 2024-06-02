@@ -25,8 +25,11 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
+      - name: Install pytest
+        run: poetry add pytest -G dev 
+
       - name: Install pytest-cov
-        run: poetry add --dev pytest-cov
+        run: poetry add pytest-cov -G dev 
 
       - name: Run tests with coverage
         run: |
@@ -37,59 +40,30 @@ jobs:
         run: |
           poetry run coverage report --fail-under=80 
 
-  code_review:
-    needs: build
+  require-approval:
     runs-on: ubuntu-latest
-    if: success() 
+    needs: build
+    if: success()
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Create a pull request to main
-        uses: peter-evans/create-pull-request@v4
+      - name: Wait for approval
+        uses: trstringer/manual-approval@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Merge release branch into main
-          branch: release-pr-${{ github.sha }}
-          base: main
-          title: 'Merge release branch into main'
-          body: 'This PR merges the release branch into main after passing all checks.'
-          delete-branch: true
-          
+          secret: ${{ github.TOKEN }}
+          approvers: HoracioBiancardi
+          minimum-approvals: 1
 
-#  require-approval:
-#    runs-on: ubuntu-latest
-#    needs: build
-#
-#    steps:
-#      - name: Download coverage check result
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: coverage-check
-#
-#      - name: Read coverage check result
-#        id: read-coverage-check
-#        run: |
-#          coverage_failed=$(cat coverage_check.txt)
-#          echo "coverage_failed=$coverage_failed" >> $GITHUB_ENV
-#
-#      - uses: trstringer/manual-approval@v1
-#        with:
-#          secret: ${{ github.TOKEN }}
-#          approvers: HoracioBiancardi
-#
-#  merge-release-to-main:
-#    runs-on: ubuntu-latest
-#    needs: require-approval
-#
-#    steps:
-#      - uses: actions/checkout@master
-#
-#      - name: Merge release -> main
-#        uses: devmasx/merge-branch@master
-#        with:
-#          type: now
-#          target_branch: main
-#          message: Merge release into main
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
+  merge-release-to-main:
+    runs-on: ubuntu-latest
+    needs: require-approval
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Merge release -> main
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          target_branch: main
+          message: Merge release into main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
