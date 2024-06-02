@@ -67,7 +67,7 @@ jobs:
         id: manual-trigger
         uses: benhamiltonpro/manual-trigger@v1
         with:
-        RUN_NAME: "require-approval"
+          RUN_NAME: "require-approval"
 
 
   require-approval:
