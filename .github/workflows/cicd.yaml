@@ -63,7 +63,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        
+
       - name: Create a pull request to main
         uses: peter-evans/create-pull-request@v4
         with:
@@ -71,7 +71,6 @@ jobs:
           branch: main
           title: 'Merge release branch into main'
           body: 'This PR merges the release branch into main after passing all checks.'
-          delete-branch: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
 #  require-approval:
