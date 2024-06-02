@@ -57,38 +57,53 @@ jobs:
           name: coverage-check
           path: coverage_check.txt
 
-  require-approval:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Download coverage check result
-        uses: actions/download-artifact@v2
+      - name: Wait_for_approval Action
+        uses: arun291091/wait_for_approval_gha@v1
         with:
-          name: coverage-check
-
-      - name: Read coverage check result
-        id: read-coverage-check
-        run: |
-          coverage_failed=$(cat coverage_check.txt)
-          echo "coverage_failed=$coverage_failed" >> $GITHUB_ENV
-
-      - uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ github.TOKEN }}
-          approvers: HoracioBiancardi
-
-  merge-release-to-main:
-    runs-on: ubuntu-latest
-    needs: require-approval
-
-    steps:
-      - uses: actions/checkout@master
-
-      - name: Merge release -> main
-        uses: devmasx/merge-branch@master
-        with:
-          type: now
-          target_branch: main
-          message: Merge release into main
+          base_repository_branch: main
+          github_org: HoracioBiancardi
+          repository_name: teste_fastapi
+          pr_reviewer: HoracioBiancardi
+          time_limit: 1000
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+
+
+
+#  require-approval:
+#    runs-on: ubuntu-latest
+#    needs: build
+#
+#    steps:
+#      - name: Download coverage check result
+#        uses: actions/download-artifact@v2
+#        with:
+#          name: coverage-check
+#
+#      - name: Read coverage check result
+#        id: read-coverage-check
+#        run: |
+#          coverage_failed=$(cat coverage_check.txt)
+#          echo "coverage_failed=$coverage_failed" >> $GITHUB_ENV
+#
+#      - uses: trstringer/manual-approval@v1
+#        with:
+#          secret: ${{ github.TOKEN }}
+#          approvers: HoracioBiancardi
+#
+#  merge-release-to-main:
+#    runs-on: ubuntu-latest
+#    needs: require-approval
+#
+#    steps:
+#      - uses: actions/checkout@master
+#
+#      - name: Merge release -> main
+#        uses: devmasx/merge-branch@master
+#        with:
+#          type: now
+#          target_branch: main
+#          message: Merge release into main
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
