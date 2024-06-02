@@ -73,21 +73,10 @@ jobs:
           coverage_failed=$(cat coverage_check.txt)
           echo "coverage_failed=$coverage_failed" >> $GITHUB_ENV
 
-      - name: Wait for approval
-        if: env.coverage_failed != 'true'
-        run: |
-          # Comment on the PR requesting manual approval
-          pull_request_url=$(jq -r .pull_request.url $GITHUB_EVENT_PATH)
-          comments_url="$pull_request_url/comments"
-          body="Please approve this pull request manually."
-          curl -X POST -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -d "{\"body\": \"$body\"}" "$comments_url"
-
-          # Check for approval
-          approval_status=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "$pull_request_url/reviews" | jq '.[] | select(.state == "approved")')
-          if [ -z "$approval_status" ]; then
-            echo "Approval not received. Exiting workflow."
-            exit 1
-          fi
+      - uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: HoracioBiancardi
 
       - name: Merge pull request into main
         if: env.coverage_failed != 'true'
