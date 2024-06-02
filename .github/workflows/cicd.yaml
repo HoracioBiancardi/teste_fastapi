@@ -83,14 +83,26 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            github.rest.pulls.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-              merge_method: 'merge'
-            })
+            const { context, github } = require('@actions/github');
+
+            // Verificar se o pull request está presente
+            if (context.payload.pull_request) {
+              // Obter o número do pull request
+              const pull_number = context.payload.pull_request.number;
+
+              // Realizar o merge
+              github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pull_number, // Usar o número do pull request
+                merge_method: 'merge'
+              });
+            } else {
+              console.log('Pull request não encontrado. Não foi possível realizar o merge.');
+            }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
   merge-release-to-main:
     runs-on: ubuntu-latest
